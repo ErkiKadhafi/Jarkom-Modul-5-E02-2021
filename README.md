@@ -5,8 +5,32 @@
 ## 1. Agar topologi yang kalian buat dapat mengakses keluar, kalian diminta untuk mengkonfigurasi Foosha menggunakan iptables, tetapi Luffy tidak ingin menggunakan MASQUERADE.
 
 ## 2. Kalian diminta untuk mendrop semua akses HTTP dari luar Topologi kalian pada server yang merupakan DHCP Server dan DNS Server demi menjaga keamanan.
+Untuk soal ini, dilakukan pembatasan untuk akses yang mengarah ke subnet yang berisi DHCP Server dan DNS Server yang dalam kelompok kami adalah C1. Untuk melakukan hal itu, digunakan syntax berikut
+
+```
+ipgateway=$(ip -4 addr show eth0 | grep inet | awk '{ print substr( $2, 1, length($2)-3 ) }')
+
+iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source $ipgateway
+```
+Syntax diatas dijalankan pada server `JIPANGU` sebagai DHCP Server dan `DORIKI` sebagai DNS Server.
+
+Pertama-tama, kita memerlukan IP gateway ke nat yang bersifat dinamis. Oleh karena itu, IP Gateway diambil menggunakan `grep` dan `awk` dan disimpan ke dalam variable `ipgateway`.
+
+Setelah mendapatkan ipgateway, dilakukan syntax `iptables`. Syntax ini berarti setiap paket yang keluar dari rooter `FOOSHA` melalui `-eth0`, akan diarahkan ke `ipgateway` yang didapatkan sebelumnya.
+
 
 ## 3. Karena kelompok kalian maksimal terdiri dari 3 orang. Luffy meminta kalian untuk membatasi DHCP dan DNS Server hanya boleh menerima maksimal 3 koneksi ICMP secara bersamaan menggunakan iptables, selebihnya didrop.
+Untuk mengerjakan soal ini, dilakukan syntax
+
+```
+iptables -A INPUT -p icmp --icmp-type echo-request -m connlimit --connlimit-above 3 --connlimit-mask 0 -j DROP
+
+iptables -A OUTPUT -p icmp --icmp-type echo-request -m connlimit --connlimit-above 3 --connlimit-mask 0 -j DROP
+```
+
+Syntax diatas dijalankan pada server `JIPANGU` sebagai DHCP Server dan `DORIKI` sebagai DNS Server.
+
+Syntax diatas berarti setiap paket yang masuk ke server `JIPANGU` dan `DORIKI` dengan protokol `icmp` dan tipe `echo-request` sebagai penanda untuk (ping) dan koneksi yang diterima sudah melebihi **3** akan di drop atau ditolak.
 
 ## 4. Akses dari subnet Blueno dan Cipher hanya diperbolehkan pada pukul 07.00 - 15.00 pada hari Senin sampai Kamis.
 
