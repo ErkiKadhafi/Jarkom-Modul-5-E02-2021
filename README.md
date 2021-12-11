@@ -4,6 +4,112 @@
 
 ![image](https://user-images.githubusercontent.com/70801807/145679079-2bda5a1c-9201-4d73-9b5c-226ae3eb1ab6.png)
 
+Selanjutnya dilakukan konfigurasi untuk beberapa node yaitu :
+### Doriki (DNS Server)
+Untuk menjadikan Doriki sebagai DNS Server maka dilakukan instalasi sebagai berikut :
+```
+apt-get update
+apt-get install bind9 -y
+```
+
+### Jipangu (DHCP Server)
+Untuk menjadikan Jipangu sebagai DHCP Server maka dilakukan instalasi sebagai berikut :
+```
+apt-get update
+apt-get install isc-dhcp-server -y
+```
+Selanjutnya dilakukan konfigurasi pada file-file berikut :
+- /etc/default/isc-dhcp-server
+Sesuaikan interface seperti di bawah ini :
+```
+...
+INTERFACES=”eth0”
+...
+```
+
+- /etc/dhcp/dhcpd.conf
+Setting subnet Blueno, Cipher, Elena, dan Fukurou sebagai berikut :
+```
+…
+# Blueno
+subnet 10.30.0.128 netmask 255.255.255.128 {
+    range 10.30.0.130 10.30.0.254;
+    option routers 10.30.0.129;
+    option broadcast-address 10.30.0.255;
+    option domain-name-servers 192.168.122.1;
+    default-lease-time 600;
+    max-lease-time 7200;
+}
+# Cipher
+subnet 10.30.4.0 netmask 255.255.252.0 {
+    range 10.30.4.2 10.30.7.254;
+    option routers 10.30.4.1;
+    option broadcast-address 10.30.7.255;
+    option domain-name-servers 192.168.122.1;
+    default-lease-time 600;
+    max-lease-time 7200;
+}
+# Elena
+subnet 10.30.18.0 netmask 255.255.254.0 {
+    range 10.30.18.2 10.30.19.254;
+    option routers 10.30.18.1;
+    option broadcast-address 10.30.19.255;
+    option domain-name-servers 10.30.0.2;
+    default-lease-time 600;
+    max-lease-time 7200;
+}
+# Fukurou
+subnet 10.30.16.0 netmask 255.255.255.0 {
+    range 10.30.16.2 10.30.16.254;
+    option routers 10.30.16.1;
+    option broadcast-address 10.30.16.255;
+    option domain-name-servers 10.30.0.2;
+    default-lease-time 600;
+    max-lease-time 7200;
+}
+```
+
+### Maingate & Jorge (Web Server)
+Untuk menjadikan Maingate & Jorge sebagai Web Server maka dilakukan instalasi sebagai berikut :
+```
+apt-get install apache2 -y
+```
+
+### Water7, Guanhao & Foosha (DHCP Relay)
+Untuk menajdikan Water7, Guanhao & Foosha sebagai DHCP Relay maka dilakukan instalasi sebagai berikut :
+```
+apt-get update
+apt-get install isc-dhcp-relay -y
+```
+
+- Untuk Water7 dilakukan konfigurasi pada file /etc/default/isc-dhcp-relay sebagai berikut:
+```
+# What servers should the DHCP relay forward requests to?
+SERVERS="10.30.0.3"
+
+# On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
+INTERFACES="eth2 eth1 eth3"
+```
+
+- Untuk Guanhao dilakukan konfigurasi pada file /etc/default/isc-dhcp-relay sebagai berikut:
+```
+# What servers should the DHCP relay forward requests to?
+SERVERS="10.30.0.3"
+
+# On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
+INTERFACES="eth0 eth1 eth3"
+```
+
+- Untuk Foosha dilakukan konfigurasi pada file /etc/default/isc-dhcp-relay sebagai berikut:
+```
+# What servers should the DHCP relay forward requests to?
+SERVERS="10.30.0.3"
+
+# On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
+INTERFACES="eth1 eth2"
+```
+
+
 ## B. Karena kalian telah belajar subnetting dan routing, Luffy ingin meminta kalian untuk membuat topologi tersebut menggunakan teknik CIDR atau VLSM. setelah melakukan subnetting, 
 ### Teknik yang dipilih adalah CIDR dengan struktur topologi seperti berikut :
 ![image](https://user-images.githubusercontent.com/70801807/145679279-169e07fe-b381-4293-baf8-db349fa37f65.png)
@@ -142,7 +248,7 @@ auto eth0
 iface eth0 inet dhcp
 ```
 
-## Kalian juga diharuskan melakukan Routing agar setiap perangkat pada jaringan tersebut dapat terhubung.
+## C. Kalian juga diharuskan melakukan Routing agar setiap perangkat pada jaringan tersebut dapat terhubung.
 Routing :
 ![image](https://user-images.githubusercontent.com/70801807/145679412-790cffb5-e075-49b5-8872-80b2d04c0487.png)
 
@@ -162,110 +268,23 @@ route add -net 0.0.0.0 netmask 0.0.0.0 gw 10.30.8.1
 route add -net 0.0.0.0 netmask 0.0.0.0 gw 10.30.20.1
 ```
 
-Selanjutnya dilakukan konfigurasi untuk beberapa node yaitu :
-### Doriki (DNS Server)
-Untuk menjadikan Doriki sebagai DNS Server maka dilakukan instalasi sebagai berikut :
-```
-apt-get update
-apt-get install bind9 -y
-```
+## D. Tugas berikutnya adalah memberikan ip pada subnet Blueno, Cipher, Fukurou, dan Elena secara dinamis menggunakan bantuan DHCP server. Kemudian kalian ingat bahwa kalian harus setting DHCP Relay pada router yang menghubungkannya.
+- IP Blueno
+![image](https://user-images.githubusercontent.com/70801807/145680156-85d2ab89-5b10-49aa-8cf0-b26eb96702ed.png)
 
-### Jipangu (DHCP Server)
-Untuk menjadikan Jipangu sebagai DHCP Server maka dilakukan instalasi sebagai berikut :
-```
-apt-get update
-apt-get install isc-dhcp-server -y
-```
-Selanjutnya dilakukan konfigurasi pada file-file berikut :
-- /etc/default/isc-dhcp-server
-Sesuaikan interface seperti di bawah ini :
-```
-...
-INTERFACES=”eth0”
-...
-```
+- IP Cipher
+![image](https://user-images.githubusercontent.com/70801807/145680177-c73d1e28-ae05-463e-80f7-2f7541398be4.png)
 
-- /etc/dhcp/dhcpd.conf
-Setting subnet Blueno, Cipher, Elena, dan Fukurou sebagai berikut :
-```
-…
-# Blueno
-subnet 10.30.0.128 netmask 255.255.255.128 {
-    range 10.30.0.130 10.30.0.254;
-    option routers 10.30.0.129;
-    option broadcast-address 10.30.0.255;
-    option domain-name-servers 192.168.122.1;
-    default-lease-time 600;
-    max-lease-time 7200;
-}
-# Cipher
-subnet 10.30.4.0 netmask 255.255.252.0 {
-    range 10.30.4.2 10.30.7.254;
-    option routers 10.30.4.1;
-    option broadcast-address 10.30.7.255;
-    option domain-name-servers 192.168.122.1;
-    default-lease-time 600;
-    max-lease-time 7200;
-}
-# Elena
-subnet 10.30.18.0 netmask 255.255.254.0 {
-    range 10.30.18.2 10.30.19.254;
-    option routers 10.30.18.1;
-    option broadcast-address 10.30.19.255;
-    option domain-name-servers 10.30.0.2;
-    default-lease-time 600;
-    max-lease-time 7200;
-}
-# Fukurou
-subnet 10.30.16.0 netmask 255.255.255.0 {
-    range 10.30.16.2 10.30.16.254;
-    option routers 10.30.16.1;
-    option broadcast-address 10.30.16.255;
-    option domain-name-servers 10.30.0.2;
-    default-lease-time 600;
-    max-lease-time 7200;
-}
-```
+- IP Elena
+![image](https://user-images.githubusercontent.com/70801807/145680207-38f32d44-57fc-4afd-8584-07ebe89280cf.png)
 
-### Maingate & Jorge (Web Server)
-Untuk menjadikan Maingate & Jorge sebagai Web Server maka dilakukan instalasi sebagai berikut :
-```
-apt-get install apache2 -y
-```
 
-### Water7, Guanhao & Foosha (DHCP Relay)
-Untuk menajdikan Water7, Guanhao & Foosha sebagai DHCP Relay maka dilakukan instalasi sebagai berikut :
-```
-apt-get update
-apt-get install isc-dhcp-relay -y
-```
+- IP Fukurou
+![image](https://user-images.githubusercontent.com/70801807/145680214-802fa163-bc6c-4417-9d98-bc0b1abced2c.png)
 
-- Untuk Water7 dilakukan konfigurasi pada file /etc/default/isc-dhcp-relay sebagai berikut:
-```
-# What servers should the DHCP relay forward requests to?
-SERVERS="10.30.0.3"
 
-# On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
-INTERFACES="eth2 eth1 eth3"
-```
 
-- Untuk Guanhao dilakukan konfigurasi pada file /etc/default/isc-dhcp-relay sebagai berikut:
-```
-# What servers should the DHCP relay forward requests to?
-SERVERS="10.30.0.3"
 
-# On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
-INTERFACES="eth0 eth1 eth3"
-```
-
-- Untuk Foosha dilakukan konfigurasi pada file /etc/default/isc-dhcp-relay sebagai berikut:
-```
-# What servers should the DHCP relay forward requests to?
-SERVERS="10.30.0.3"
-
-# On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
-INTERFACES="eth1 eth2"
-```
 
 ## 1. Agar topologi yang kalian buat dapat mengakses keluar, kalian diminta untuk mengkonfigurasi Foosha menggunakan iptables, tetapi Luffy tidak ingin menggunakan MASQUERADE.
 Konfigurasi iptables untuk Foosha dengan menggunakan SNAT adalah sebagai berikut :
